@@ -22,7 +22,7 @@ for iter = 1:num_iters
 
 
 
-
+     theta=theta - (((( ([theta; 1]' * [X, -1*y]') ) * X )'*alpha)/m)
 
 
 
