@@ -62,7 +62,7 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 X=[ones(m,1) X];
-y=((ones(m,1)*[1 2 3 4 5 6 7 8 9 10]) == y);
+y=((ones(m,1)*[1:num_labels]) == y);
 
 a2=sigmoid(Theta1*X')';
 
@@ -71,9 +71,40 @@ a2 = [ones(size(a2, 1), 1) a2];
 a3=sigmoid(Theta2*a2')';
 
 
-J=(sum(diag((-1.*y')*log(a3) - (1.-y')*log(1.-a3))))/m;
+J=(sum(diag((-1.*y')*log(a3) - (1.-y')*log(1.-a3))))/m ...
++ (lambda/(2*m))*((((ones(size(Theta1(:,2:end)))(:))') * (((Theta1(:,2:end)(:))).^2)) ...
+ + (((ones(size(Theta2(:,2:end)))(:))') * (((Theta2(:,2:end)(:))).^2)));
 
+DL2_B=zeros(size(Theta2));
+DL1_B=zeros(size(Theta1));
+for t = 1:m
+  a1_b=X(t,:);
+  y_b=y(t,:);
+  
+  a2_b=sigmoid(Theta1*a1_b')';
+  a2_b = [ones(size(a2_b, 1), 1) a2_b];
+  
+  a3_b=sigmoid(Theta2*a2_b')';
+  
 
+  d3_b=a3_b' - y_b';
+  
+  d2_b=(Theta2'*d3_b).*[0;sigmoidGradient(Theta1*a1_b')];
+  d2_b=d2_b(2:end);
+  
+  
+  %fprintf('\nsize of d2b: %f,%f\n', size(d2_b)(1),size(d2_b)(2));
+  %fprintf('\nsize of d3b: %f,%f\n', size(d3_b)(1),size(d3_b)(2));
+  
+  %fprintf('\nsize of a2b: %f,%f\n', size(a2_b)(1),size(a2_b)(2));
+  %fprintf('\nsize of a3b: %f,%f\n', size(a3_b)(1),size(a3_b)(2));
+  
+  DL2_B=DL2_B .+ (d3_b*a2_b);
+  DL1_B=DL1_B .+ (d2_b*a1_b);
+  
+endfor
+Theta1_grad=DL1_B ./ m;
+Theta2_grad=DL1_B ./ m;
 
 % -------------------------------------------------------------
 
